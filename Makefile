@@ -6,6 +6,7 @@ up-build:
 	docker-compose up --build
 setup:
 	docker-compose build
+	docker-compose run --rm frontend ash -c 'npm install && cd unimark && npm install'
 
 front-ash:
 	docker-compose run frontend ash
