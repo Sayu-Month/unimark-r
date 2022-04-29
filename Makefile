@@ -4,6 +4,8 @@ up:
 	docker-compose up
 up-build:
 	docker-compose up --build
+setup:
+	docker-compose build
 
 front-ash:
 	docker-compose run frontend ash
