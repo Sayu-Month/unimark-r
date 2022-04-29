@@ -4,6 +4,9 @@ WORKDIR /backend
 
 COPY . .
 
+RUN rustup component add rustfmt
+RUN rustup component add clippy
+
 RUN cargo build --release
 RUN cargo install --path .
 
