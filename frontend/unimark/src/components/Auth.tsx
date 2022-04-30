@@ -1,6 +1,52 @@
 import { LockClosedIcon } from '@heroicons/react/solid';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { Axios } from '../lib/axios';
+import { AxiosResponse, AxiosError } from 'axios';
+import Cookie from 'universal-cookie';
+
+import token from '../json/token.json';
+
+type TOKEN = typeof token;
+const cookie = new Cookie();
 
 const Auth = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
+
+  const login = async () => {
+    await Axios.post(`api/proxy/authorize`, {
+      email: email,
+      password: password,
+    })
+      .then((res: AxiosResponse<TOKEN[]>) => {
+        const { data, status } = res;
+        console.log(data);
+        console.log(status);
+        if (status === 400) {
+          throw 'authentication faild';
+        } else if (res.statusText === 'OK') {
+          console.log(res);
+          const options = { path: '/' };
+          cookie.set('access_token', res.data, options);
+          router.push('/main');
+        } else {
+          alert('error');
+        }
+      })
+      .catch((e: AxiosError<{ error: string }>) => {
+        console.log(e.message);
+        alert(e.message);
+      });
+  };
+
+  const authUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    login();
+  };
+
   return (
     <div className='min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-md w-full space-y-8'>
@@ -9,7 +55,7 @@ const Auth = () => {
             Sign in to your account
           </h2>
         </div>
-        <form className='mt-8 space-y-6' action='#' method='POST'>
+        <form className='mt-8 space-y-6' onSubmit={authUser}>
           <input type='hidden' name='remember' defaultValue='true' />
           <div className='rounded-md shadow-sm -space-y-px'>
             <div>
@@ -24,6 +70,10 @@ const Auth = () => {
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm'
                 placeholder='Email address'
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
               />
             </div>
             <div>
@@ -38,6 +88,10 @@ const Auth = () => {
                 required
                 className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm'
                 placeholder='Password'
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
             </div>
           </div>
@@ -73,8 +127,17 @@ const Auth = () => {
                   aria-hidden='true'
                 />
               </span>
-              Sign in
+              {isLogin ? 'Login' : 'Create new User'}
             </button>
+          </div>
+
+          <div>
+            <div
+              onClick={() => setIsLogin(!isLogin)}
+              className='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+            >
+              {isLogin ? 'Sign up' : 'Sign in'}
+            </div>
           </div>
         </form>
       </div>
