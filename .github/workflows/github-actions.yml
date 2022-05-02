@@ -87,3 +87,8 @@ jobs:
       - name: clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
         working-directory: backend
+  ecr-push:
+    runs-on: ubuntu-latest
+    needs: [frontend-lint, backend-fmt, backend-clippy]
+    steps:
+      - run: echo ecr-push
