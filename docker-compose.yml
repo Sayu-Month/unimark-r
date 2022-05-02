@@ -10,10 +10,39 @@ services:
     volumes:
       - "./frontend:/$WORKDIR"
     command: sh -c "cd unimark && npm run dev"
+    depends_on:
+      - backend
+
   backend:
     build:
       context: ./backend
+      args:
+        DATABASE_URL: $DATABASE_URL
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
     ports:
-      - "8080:8080"
+      - "8000:8000"
     volumes:
       - ./backend:/backend
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0.29
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/db:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
