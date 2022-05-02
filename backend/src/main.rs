@@ -81,7 +81,7 @@ async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, A
         }
         Err(err) => {
             println!("Error!! {:?}", err);
-            return Err(AuthError::WrongCredentials);
+            Err(AuthError::WrongCredentials)
         }
     }
 }

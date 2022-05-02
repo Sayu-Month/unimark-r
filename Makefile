@@ -1,13 +1,22 @@
 build:
+	docker-compose up db -d
 	docker-compose build
+	docker-compose rm -fsv db
 up:
+	docker-compose up db -d
 	docker-compose up
 up-build:
+	docker-compose up db -d
 	docker-compose up --build
 setup:
 	cp .env_sample .env
+	docker-compose up db -d
 	docker-compose build
 	docker-compose run --rm frontend ash -c 'npm install && cd unimark && npm install'
+stop:
+	docker-compose stop
+ps:
+	docker-compose ps
 
 front-ash:
 	docker-compose run frontend ash
