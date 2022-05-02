@@ -16,6 +16,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use chrono::{DateTime, Local};
 
+mod users_fetch;
+
 static KEYS: Lazy<Keys> = Lazy::new(|| {
     let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     Keys::new(secret.as_bytes())
@@ -35,7 +37,7 @@ async fn main() {
         .route("/protected", get(protected))
         .route("/authorize", post(authorize));
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
     tracing::debug!("listening on {}", addr);
 
     axum::Server::bind(&addr)
@@ -58,24 +60,30 @@ async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, A
     if payload.email.is_empty() || payload.password.is_empty() {
         return Err(AuthError::MissingCredentials);
     }
-    // Here you can check the user credentials from a database
-    if payload.email != "y.sakoda.j1016@gmail.com" || payload.password != "password" {
-        return Err(AuthError::WrongCredentials);
+
+    match users_fetch::user_fetch(&payload.email, &payload.password).await {
+        Ok(result) => {
+            println!("Success!! {:?}", result);
+            let dt: DateTime<Local> = Local::now();
+            let timestamp: usize = (dt.timestamp() + 3600) as usize;
+
+            let claims = Claims {
+                sub: payload.email,
+                company: "Sayu".to_owned(),
+                exp: timestamp,
+            };
+            // Create the authorization token
+            let token = encode(&Header::default(), &claims, &KEYS.encoding)
+                .map_err(|_| AuthError::TokenCreation)?;
+
+            // Send the authorized token
+            Ok(Json(AuthBody::new(token)))
+        }
+        Err(err) => {
+            println!("Error!! {:?}", err);
+            return Err(AuthError::WrongCredentials);
+        }
     }
-    let dt: DateTime<Local> = Local::now();
-    let timestamp: usize = (dt.timestamp() + 3600) as usize;
-
-    let claims = Claims {
-        sub: payload.email,
-        company: "Sayu".to_owned(),
-        exp: timestamp,
-    };
-    // Create the authorization token
-    let token = encode(&Header::default(), &claims, &KEYS.encoding)
-        .map_err(|_| AuthError::TokenCreation)?;
-
-    // Send the authorized token
-    Ok(Json(AuthBody::new(token)))
 }
 
 impl Display for Claims {
