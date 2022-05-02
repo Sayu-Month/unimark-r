@@ -64,20 +64,24 @@ async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, A
     match users_fetch::user_fetch(&payload.email, &payload.password).await {
         Ok(result) => {
             println!("Success!! {:?}", result);
-            let dt: DateTime<Local> = Local::now();
-            let timestamp: usize = (dt.timestamp() + 3600) as usize;
+            if result {
+                let dt: DateTime<Local> = Local::now();
+                let timestamp: usize = (dt.timestamp() + 3600) as usize;
 
-            let claims = Claims {
-                sub: payload.email,
-                company: "Sayu".to_owned(),
-                exp: timestamp,
-            };
-            // Create the authorization token
-            let token = encode(&Header::default(), &claims, &KEYS.encoding)
-                .map_err(|_| AuthError::TokenCreation)?;
+                let claims = Claims {
+                    sub: payload.email,
+                    company: "Sayu".to_owned(),
+                    exp: timestamp,
+                };
+                // Create the authorization token
+                let token = encode(&Header::default(), &claims, &KEYS.encoding)
+                    .map_err(|_| AuthError::TokenCreation)?;
 
-            // Send the authorized token
-            Ok(Json(AuthBody::new(token)))
+                // Send the authorized token
+                Ok(Json(AuthBody::new(token)))
+            } else {
+                Err(AuthError::WrongCredentials)
+            }
         }
         Err(err) => {
             println!("Error!! {:?}", err);

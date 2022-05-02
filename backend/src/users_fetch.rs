@@ -1,7 +1,7 @@
 use sqlx::mysql::MySqlPool;
 use std::env;
 
-pub async fn user_fetch(email: &String, password: &String) -> anyhow::Result<()> {
+pub async fn user_fetch(email: &String, password: &String) -> anyhow::Result<bool> {
     let pool = MySqlPool::connect(&env::var("DATABASE_URL")?).await?;
     println!("user fetch");
 
@@ -17,12 +17,6 @@ pub async fn user_fetch(email: &String, password: &String) -> anyhow::Result<()>
     .fetch_all(&pool)
     .await?;
 
-    for rec in recs {
-        println!(
-            "id: {}, email: {}, password: {}",
-            rec.id, rec.email, rec.password,
-        );
-    }
-
-    Ok(())
+    println!("Success!! {:?}", recs);
+    Ok(!recs.is_empty())
 }
