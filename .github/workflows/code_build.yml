@@ -52,7 +52,7 @@ jobs:
         id: build-image
         with:
           push: true
-          file: deploy/development/frontend/Dockerfile
+          file: frontend/Dockerfile
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.SERVICE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
