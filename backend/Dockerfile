@@ -13,10 +13,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/app/target \
     cargo build --release
 
-RUN rustup component add rustfmt
-RUN rustup component add clippy
-RUN cargo install cargo-edit
-
 RUN cargo install --path .
 
 CMD ["backend"]
