@@ -5,6 +5,10 @@ services:
       context: ./frontend
       args:
         WORKDIR: $WORKDIR
+    environment:
+      NEXT_PUBLIC_PROTOCOL: ${PROTOCOL}
+      NEXT_PUBLIC_HOST: ${HOST}
+      NEXT_PUBLIC_PORT: ${PORT}
     ports:
       - 3000:3000
     volumes:
