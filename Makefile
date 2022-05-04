@@ -13,6 +13,7 @@ setup:
 	docker-compose up db -d
 	docker-compose build
 	docker-compose run --rm frontend ash -c 'npm install && cd unimark && npm install'
+	docker-compose rm -fsv db
 stop:
 	docker-compose stop
 ps:
