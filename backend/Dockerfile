@@ -1,4 +1,4 @@
-FROM rust-1.6.0-sqlx:1.0 AS builder
+FROM ghcr.io/sayu-month/rust1.60-sqlx:latest AS builder
 ENV PKG_CONFIG_ALLOW_CROSS=1
 
 WORKDIR /backend
