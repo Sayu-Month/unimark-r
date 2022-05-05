@@ -34,6 +34,7 @@ async fn main() {
         .init();
 
     let app = Router::new()
+        .route("/healthcheck", get(healthcheck))
         .route("/protected", get(protected))
         .route("/authorize", post(authorize));
 
@@ -46,6 +47,11 @@ async fn main() {
         .unwrap();
 }
 
+async fn healthcheck() -> Result<String, AuthError> {
+    // Send the protected data to the user
+    Ok("HealthCheck Success!!".to_string())
+}
+
 async fn protected(claims: Claims) -> Result<String, AuthError> {
     // Send the protected data to the user
     Ok(format!(
@@ -55,7 +61,7 @@ async fn protected(claims: Claims) -> Result<String, AuthError> {
 }
 
 async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody>, AuthError> {
-    println!("authorize");
+    println!("authorize start!");
     // Check if the user sent the credentials
     if payload.email.is_empty() || payload.password.is_empty() {
         return Err(AuthError::MissingCredentials);

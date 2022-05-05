@@ -17,6 +17,8 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
 
   const login = async () => {
+    console.log(`${process.env.NEXT_PUBLIC_FRONTEND_URL}`);
+    console.log(`${process.env.NEXT_PUBLIC_BACKEND_URL}`);
     await Axios.post(`api/proxy/authorize`, {
       email: email,
       password: password,
@@ -27,7 +29,7 @@ const Auth = () => {
         console.log(status);
         if (status === 400) {
           throw 'authentication faild';
-        } else if (res.statusText === 'OK') {
+        } else if (status === 200) {
           console.log(res);
           const options = { path: '/' };
           cookie.set('access_token', res.data, options);
